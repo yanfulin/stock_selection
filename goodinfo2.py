@@ -189,7 +189,6 @@ def main():
     for ID in StockCodeList:
         print ("ID=", ID)
         page = GetHtmlcode(ID)
-        print ("中文顯示")
         time.sleep(10)
 
 
