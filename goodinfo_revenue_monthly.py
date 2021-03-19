@@ -10,7 +10,7 @@ import pandas as pd
 
 def GetHtmlcode(ID):
     # Get the webpage's source html code
-    source = 'http://goodinfo.tw/StockInfo/ShowSaleMonChart.asp?STOCK_ID='
+    source = 'https://goodinfo.tw/StockInfo/ShowSaleMonChart.asp?STOCK_ID='
     url = source + ID
     print (url)
 
@@ -29,28 +29,23 @@ def GetHtmlcode(ID):
     # 'PER/PBR' '獲利指標' '股利統計'
     payload = {
         'STOCK_ID': ID,
-        'STEP': 'DATA',
+        'STEP':  'DATA',
         'CHT_CAT': '5Y'}
 
 
 
     SHEETS = ['5Y', '10Y', 'ALL']
 
-    columns = {'5Y': ['月別', '開盤', '收盤', '最高', '最低', '股價漲跌(元)', '單月營收(億)', '單月月增(%)', '單月年增(%)',
+    columns = {'5Y': ['月別', '開盤', '收盤', '最高', '最低', '股價漲跌(元)', '股價漲跌(%)', '單月營收(億)', '單月月增(%)', '單月年增(%)',
                       '累計營收(億)', '累計月增(%)', '累計年增(%)', '合併營業收入單月月增(%)', '合併營業收入單月年增(%)',
                       '合併營業收入累計月增(%)', '合併營業收入累計年增(%)'],
 
-               u'年增統計': [u'年度', u'營業收入金額(億)', u'營業收入增減(億)', u'營業收入增減(%)', u'營業毛利金額(億)', u'營業毛利增減(億)',
-                         u'營業毛利增減(%)', u'毛利(%)', u'毛利增減數', u'稅後淨利金額(億)', u'稅後淨利增減(億)', u'稅後淨利增減(%)',
-                         u'稅後淨利(%)', u'稅後增減數', u'EPS(元)', u'每股盈餘增減(元)', u'ROE(%)', u'ROE增減數', u'ROA(%)', u'ROA增減數'],
-
-               u'股利統計': [u'年度', u'股本(億)', u'財報評分', u'股價最高', u'股價最低', u'股價收盤', u'股價平均', u'股價漲跌', u'股價漲跌(%)',
-                         u'去年EPS(元)', u'股利現金(元)', u'股利股票(元)', u'股利合計(元)', u'殖利率最高(%)', u'殖利率最低(%)', u'殖利率平均(%)',
-                         u'盈餘分配率配息(%)', u'盈餘分配率配股(%)', u'盈餘分配率合計(%)'],
-
-               u'PER/PBR': [u'年度', u'股本(億)', u'財報評分', u'股價最高(元)', u'股價最低(元)', u'股價收盤(元)', u'股價平均(元)', u'股價漲跌(元)',
-                            u'股價漲跌(%)', u'EPS(元)', u'最高PER', u'最低PER', u'平均PER', u'BPS(元)', u'最高PBR', u'最低PBR',
-                            u'平均PBR']}
+               '10Y': ['月別', '開盤', '收盤', '最高', '最低', '股價漲跌(元)', '股價漲跌(%)', '單月營收(億)', '單月月增(%)', '單月年增(%)',
+                      '累計營收(億)', '累計月增(%)', '累計年增(%)', '合併營業收入單月月增(%)', '合併營業收入單月年增(%)',
+                      '合併營業收入累計月增(%)', '合併營業收入累計年增(%)'],
+               'ALL': ['月別', '開盤', '收盤', '最高', '最低', '股價漲跌(元)', '股價漲跌(%)', '單月營收(億)', '單月月增(%)', '單月年增(%)',
+                      '累計營收(億)', '累計月增(%)', '累計年增(%)', '合併營業收入單月月增(%)', '合併營業收入單月年增(%)',
+                      '合併營業收入累計月增(%)', '合併營業收入累計年增(%)']}
 
     HEADER = '''
     <!DOCTYPE html> 
@@ -93,20 +88,15 @@ def GetHtmlcode(ID):
 
     for key in SHEETS:
         payload['CHT_CAT'] = key
-        print(payload)
-        res = requests.post('http://goodinfo.tw/StockInfo/ShowSaleMonChart.asp?', headers=headers, verify=False, data=payload)
-        #res = requests.post('http://goodinfo.tw/StockInfo/ShowSaleMonChart.asp?STOCK_ID=2330&STEP=DATA&CHT_CAT=5Y', headers=headers)
 
+        res = requests.post('https://goodinfo.tw/StockInfo/ShowSaleMonChart.asp?', headers=headers, verify=False, data=payload)
         res.encoding = 'utf-8'
-        print(res)
-        print(res.url)
-        #print(res.content)
         soup = BeautifulSoup(res.text.replace('&nbsp;', '').replace('　', ''), 'lxml')
         [s.extract() for s in soup('thead')]  # remove thead
         #soup= soup.find("div", {"id": "divSaleMonChartDetail"})
-        print(soup)
-        df = pd.read_html(str(soup))
-        print(df)
+        #print(soup)
+        df = pd.read_html(str(soup))[1]
+        #print(df)
         df.columns = columns[key]
         print (df)
 
@@ -192,7 +182,6 @@ def main():
     for ID in StockCodeList:
         print ("ID=", ID)
         page = GetHtmlcode(ID)
-        print ("中文顯示")
         time.sleep(10)
 
 
