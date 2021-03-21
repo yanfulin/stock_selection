@@ -1,7 +1,7 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 import requests
-import sys
+#import sys
 import os
 import time
 from bs4 import BeautifulSoup
@@ -10,8 +10,17 @@ import pandas as pd
 
 def GetHtmlcode(ID):
     # Get the webpage's source html code
-    source = 'https://goodinfo.tw/StockInfo/ShowSaleMonChart.asp?STOCK_ID='
-    url = source + ID
+    # get the monthly revenue via
+    # https://goodinfo.tw/StockInfo/ShowSaleMonChart.asp?STOCK_ID=5534&STEP=DATA&CHT_CAT=5Y
+    # Protocol:https
+    # Host:goodinfo.tw
+    # Path:/StockInfo/ShowSaleMonChart.asp
+    # PARAMETERS
+    # STOCK_ID:5534
+    # STEP:DATA
+    # CHT_CAT: 5Y, 10Y, ALL
+    source = f'https://goodinfo.tw/StockInfo/StockBzPerformance.asp?STOCK_ID={ID}&STEP=DATA&CHT_CAT=ALL'
+    url = source
     print (url)
 
     # Header
@@ -22,30 +31,38 @@ def GetHtmlcode(ID):
                'content-type': 'application/x-www-form-urlencoded;',
                'cookie': '__gads=ID=fe562308f92c2979:T=1511748749:S=ALNI_MZDfWP11BwzcEPLDztntanza0Uc0Q; GOOD%5FINFO%5FSTOCK%5FBROWSE%5FLIST=4%7C2324%7C2385%7C9924%7C2103; _ga=GA1.2.1450427542.1511748749; _gid=GA1.2.614910067.1512647858; SCREEN_SIZE=WIDTH=1680&HEIGHT=1050',
                'dnt': '1',
-               'origin': 'http://goodinfo.tw',
+               'origin': 'https://goodinfo.tw',
                'referer': url,
                'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'}
 
-
+    # 'PER/PBR' '獲利指標' '股利統計'
     payload = {
-        'STOCK_ID': ID,
-        'STEP':  'DATA',
-        'CHT_CAT': '5Y'}
+        u'STOCK_ID': ID,
+        u'YEAR_PERIOD': u'9999',
+        u'RPT_CAT': u'M_YEAR',
+        u'STEP': u'DATA',
+        #u'SHEET': u'股利統計'}
+        u'SHEET': '獲利指標'}
+        # 'SHEET': 'PER/PBR'}
 
 
+    SHEETS = ['獲利指標', '年增統計', 'PER/PBR']
 
-    SHEETS = ['5Y', '10Y', 'ALL']
+    columns = {'獲利指標': ['年度', '股本(億)', '財報評分', '股價收盤', '股價平均', u'股價漲跌', u'股價漲跌(%)', u'營業收入(億)', u'營業毛利(億)',
+                         u'營業利益(億)', u'業外損益(億)', u'稅後淨利(億)', u'營業毛利(%)', u'營業利益(%)', u'業外損益(%)', u'稅後淨利(%)', u'ROE(%)',
+                         u'ROA(%)', u'稅後EPS(元)', u'成長(元)', u'BPS(元)'],
 
-    columns = {'5Y': ['月別', '開盤', '收盤', '最高', '最低', '股價漲跌(元)', '股價漲跌(%)', '單月營收(億)', '單月月增(%)', '單月年增(%)',
-                      '累計營收(億)', '累計月增(%)', '累計年增(%)', '合併營業收入單月月增(%)', '合併營業收入單月年增(%)',
-                      '合併營業收入累計月增(%)', '合併營業收入累計年增(%)'],
+               u'年增統計': [u'年度', u'營業收入金額(億)', u'營業收入增減(億)', u'營業收入增減(%)', u'營業毛利金額(億)', u'營業毛利增減(億)',
+                         u'營業毛利增減(%)', u'毛利(%)', u'毛利增減數', u'稅後淨利金額(億)', u'稅後淨利增減(億)', u'稅後淨利增減(%)',
+                         u'稅後淨利(%)', u'稅後增減數', u'EPS(元)', u'每股盈餘增減(元)', u'ROE(%)', u'ROE增減數', u'ROA(%)', u'ROA增減數'],
 
-               '10Y': ['月別', '開盤', '收盤', '最高', '最低', '股價漲跌(元)', '股價漲跌(%)', '單月營收(億)', '單月月增(%)', '單月年增(%)',
-                      '累計營收(億)', '累計月增(%)', '累計年增(%)', '合併營業收入單月月增(%)', '合併營業收入單月年增(%)',
-                      '合併營業收入累計月增(%)', '合併營業收入累計年增(%)'],
-               'ALL': ['月別', '開盤', '收盤', '最高', '最低', '股價漲跌(元)', '股價漲跌(%)', '單月營收(億)', '單月月增(%)', '單月年增(%)',
-                      '累計營收(億)', '累計月增(%)', '累計年增(%)', '合併營業收入單月月增(%)', '合併營業收入單月年增(%)',
-                      '合併營業收入累計月增(%)', '合併營業收入累計年增(%)']}
+               u'股利統計': [u'年度', u'股本(億)', u'財報評分', u'股價最高', u'股價最低', u'股價收盤', u'股價平均', u'股價漲跌', u'股價漲跌(%)',
+                         u'去年EPS(元)', u'股利現金(元)', u'股利股票(元)', u'股利合計(元)', u'殖利率最高(%)', u'殖利率最低(%)', u'殖利率平均(%)',
+                         u'盈餘分配率配息(%)', u'盈餘分配率配股(%)', u'盈餘分配率合計(%)'],
+
+               u'PER/PBR': [u'年度', u'股本(億)', u'財報評分', u'股價最高(元)', u'股價最低(元)', u'股價收盤(元)', u'股價平均(元)', u'股價漲跌(元)',
+                            u'股價漲跌(%)', u'EPS(元)', u'最高PER', u'最低PER', u'平均PER', u'BPS(元)', u'最高PBR', u'最低PBR',
+                            u'平均PBR']}
 
     HEADER = '''
     <!DOCTYPE html> 
@@ -87,16 +104,15 @@ def GetHtmlcode(ID):
     df_final = pd.DataFrame(raw_data, columns=labels)
 
     for key in SHEETS:
-        payload['CHT_CAT'] = key
-
-        res = requests.post('https://goodinfo.tw/StockInfo/ShowSaleMonChart.asp?', headers=headers, verify=False, data=payload)
+        payload['SHEET'] = key
+        res = requests.post(f'https://goodinfo.tw/StockInfo/StockBzPerformance.asp?STOCK_ID={ID}&STEP=DATA&CHT_CAT=ALL')
         res.encoding = 'utf-8'
+        print(res)
         soup = BeautifulSoup(res.text.replace('&nbsp;', '').replace('　', ''), 'lxml')
         [s.extract() for s in soup('thead')]  # remove thead
-        #soup= soup.find("div", {"id": "divSaleMonChartDetail"})
-        #print(soup)
-        df = pd.read_html(str(soup))[1]
-        #print(df)
+        print(soup)
+
+        df = pd.read_html(str(soup))[0]
         df.columns = columns[key]
         print (df)
 
