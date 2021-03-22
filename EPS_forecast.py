@@ -1,4 +1,4 @@
-#! /usr/bin/python
+# ! /usr/bin/python
 # -*- coding: utf-8 -*-
 import requests
 import sys
@@ -7,14 +7,25 @@ import time
 from bs4 import BeautifulSoup
 import pandas as pd
 
+#TODO: estimate the quarterly EPS
+
+# get the monthly revenue and convert it to quarterly data (use resample("Q"))
+# get the historical EPS per quarter
+## https://goodinfo.tw/StockInfo/StockFinDetail.asp?RPT_CAT=XX_M_QUAR_ACC&STOCK_ID=2330
+# Estimate the EPS based on quarterly revenue forecast
+
+
+
+
 # this can disable the requests warnings.
 requests.packages.urllib3.disable_warnings()
 
-def GetHtmlcode(ID):
+
+def GetEPScode(ID):
     # Get the webpage's source html code
-    source = 'https://goodinfo.tw/StockInfo/ShowSaleMonChart.asp?STOCK_ID='
+    source = 'https://goodinfo.tw/StockInfo/StockFinDetail.asp?STOCK_ID='
     url = source + ID
-    print (url)
+    print(url)
 
     # Header
     headers = {'accept': '*/*',
@@ -28,26 +39,18 @@ def GetHtmlcode(ID):
                'referer': url,
                'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'}
 
-
     payload = {
         'STOCK_ID': ID,
-        'STEP':  'DATA',
-        'CHT_CAT': '5Y'}
+        'REP_CAT': 'XX_M_QUAR_ACC'}
 
+    SHEETS = ['Quarter_EPS']
 
-
-    SHEETS = ['5Y', '10Y', 'ALL']
-
-    columns = {'5Y': ['月別', '開盤', '收盤', '最高', '最低', '股價漲跌(元)', '股價漲跌(%)', '單月營收(億)', '單月月增(%)', '單月年增(%)',
-                      '累計營收(億)', '累計月增(%)', '累計年增(%)', '合併營業收入單月月增(%)', '合併營業收入單月年增(%)',
-                      '合併營業收入累計月增(%)', '合併營業收入累計年增(%)'],
-
-               '10Y': ['月別', '開盤', '收盤', '最高', '最低', '股價漲跌(元)', '股價漲跌(%)', '單月營收(億)', '單月月增(%)', '單月年增(%)',
-                      '累計營收(億)', '累計月增(%)', '累計年增(%)', '合併營業收入單月月增(%)', '合併營業收入單月年增(%)',
-                      '合併營業收入累計月增(%)', '合併營業收入累計年增(%)'],
-               'ALL': ['月別', '開盤', '收盤', '最高', '最低', '股價漲跌(元)', '股價漲跌(%)', '單月營收(億)', '單月月增(%)', '單月年增(%)',
-                      '累計營收(億)', '累計月增(%)', '累計年增(%)', '合併營業收入單月月增(%)', '合併營業收入單月年增(%)',
-                      '合併營業收入累計月增(%)', '合併營業收入累計年增(%)']}
+    columns = {'Quarter_EPS': ['2020Q3', '2020Q2', '2020Q1',
+                                  '2019Q4', '2019Q3', '2019Q2', '2019Q1',
+                                  '2018Q4', '2018Q3', '2091Q2'],
+               'Quarter_EPS2': ['Q1', 'Q2', 'Q3', 'Q4',
+                                  'Q5', 'Q6', 'Q7', 'Q8',
+                                  'Q9', 'Q10']}
 
     HEADER = '''
     <!DOCTYPE html> 
@@ -65,13 +68,14 @@ def GetHtmlcode(ID):
     for key in SHEETS:
         payload['CHT_CAT'] = key
 
-        res = requests.post('https://goodinfo.tw/StockInfo/ShowSaleMonChart.asp?', headers=headers, verify=False, data=payload)
+        res = requests.post('https://goodinfo.tw/StockInfo/StockFinDetail.asp?', headers=headers, verify=False,
+                            data=payload)
         res.encoding = 'utf-8'
         soup = BeautifulSoup(res.text.replace('&nbsp;', '').replace('　', ''), 'lxml')
         [s.extract() for s in soup('thead')]  # remove thead
         df = pd.read_html(str(soup))[1]
         df.columns = columns[key]
-        print (df)
+        print(df)
 
         key = key.replace('/', '_')
 
@@ -89,17 +93,14 @@ def GetHtmlcode(ID):
 
 
 def main():
-    # python2
-    #reload(sys)
-    #sys.setdefaultencoding('utf-8')
 
     fin = open('StockCode', 'r+')
     StockCodeList = [str(i) for i in fin.read().splitlines()]
     fin.close()
 
     for ID in StockCodeList:
-        print ("ID=", ID)
-        page = GetHtmlcode(ID)
+        print("ID=", ID)
+        page = GetEPScode(ID)
         time.sleep(10)
 
 
