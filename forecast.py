@@ -11,8 +11,8 @@ from fbprophet import Prophet
 import forecast_comparison
 
 ## Set Date Formats
-today_string = datetime.datetime.today().strftime('%m%d%Y_%I%p')
-today_string2 = datetime.datetime.today().strftime('%b %d, %Y')
+# today_string = datetime.datetime.today().strftime('%m%d%Y_%I%p')
+# today_string2 = datetime.datetime.today().strftime('%b %d, %Y')
 
 # Goodinfo provides 5years/10years/ALL monthly revenue
 filelist = ["5Y", "10Y", "ALL"]

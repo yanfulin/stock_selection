@@ -7,6 +7,8 @@ import time
 from bs4 import BeautifulSoup
 import pandas as pd
 
+# this can disable the requests warnings.
+requests.packages.urllib3.disable_warnings()
 
 def GetHtmlcode(ID):
     # Get the webpage's source html code
@@ -60,31 +62,31 @@ def GetHtmlcode(ID):
     </html>
     '''
 
-    labels = [u'年度',
-              u'股本',
-              u'營收(億)',
-              u'稅後淨利(億)',
-              u'毛利(%)',
-              u'營益(%)',
-              u'ROE',
-              u'EPS',
-              u'獲利矩陣',
-              u'現金',
-              u'股票',
-              u'股利合計',
-              u'高低價差',
-              u'最高價',
-              u'最高本益比',
-              u'日期',
-              u'最低價',
-              u'最低本益比',
-              u'日期',
-              u'收盤平均價',
-              u'平均本益比']
+    # labels = [u'年度',
+    #           u'股本',
+    #           u'營收(億)',
+    #           u'稅後淨利(億)',
+    #           u'毛利(%)',
+    #           u'營益(%)',
+    #           u'ROE',
+    #           u'EPS',
+    #           u'獲利矩陣',
+    #           u'現金',
+    #           u'股票',
+    #           u'股利合計',
+    #           u'高低價差',
+    #           u'最高價',
+    #           u'最高本益比',
+    #           u'日期',
+    #           u'最低價',
+    #           u'最低本益比',
+    #           u'日期',
+    #           u'收盤平均價',
+    #           u'平均本益比']
 
-    w, h = 21, 10
-    raw_data = [['-' for x in range(w)] for y in range(h)]
-    df_final = pd.DataFrame(raw_data, columns=labels)
+    # w, h = 21, 10
+    # raw_data = [['-' for x in range(w)] for y in range(h)]
+    # df_final = pd.DataFrame(raw_data, columns=labels)
 
     for key in SHEETS:
         payload['CHT_CAT'] = key
@@ -99,53 +101,53 @@ def GetHtmlcode(ID):
         #print(df)
         df.columns = columns[key]
         print (df)
-
-        if key == u'獲利指標':
-            print ("key is", key)
-            df_final[u'年度'] = df[u'年度']
-            df_final[u'股本'] = df[u'股本(億)']
-            df_final[u'營收(億)'] = df[u'營業收入(億)']
-            df_final[u'稅後淨利(億)'] = df[u'稅後淨利(億)']
-            df_final[u'毛利(%)'] = df[u'營業毛利(%)']
-            df_final[u'營益(%)'] = df[u'營業利益(%)']
-            df_final[u'ROE'] = df[u'ROE(%)']
-            df_final[u'EPS'] = df[u'稅後EPS(元)']
-        elif key == u'股利統計':
-            print("key is", key)
-            df_final[u'現金'] = df[u'股利現金(元)']
-            df_final[u'股票'] = df[u'股利股票(元)']
-            df_final[u'股利合計'] = df[u'股利合計(元)']
-
-            # 高低價差
-            h = df[u'股價最高']
-            l = df[u'股價最低']
-
-            count = 0
-            for hh in h:
-                if hh == u'-':
-                    break
-                count = count + 1
-
-            if count > 10:
-                count = 10
-            # print count
-
-            h = h[:count]
-            l = l[:count]
-            # raw_input()
-            h = pd.to_numeric(h)
-            l = pd.to_numeric(l)
-            df_final[u'高低價差'] = h - l
-            df_final[u'最高價'] = df[u'股價最高']
-            df_final[u'最低價'] = df[u'股價最低']
-        elif key == u'PER/PBR':
-            print("key is", key)
-            df_final[u'最高本益比'] = df[u'最高PER']
-            df_final[u'最低本益比'] = df[u'最低PER']
-            df_final[u'收盤平均價'] = df[u'股價平均(元)']
-            df_final[u'平均本益比'] = df[u'平均PER']
-            # print df_final[u'平均本益比']
-            # raw_input()
+        #
+        # if key == u'獲利指標':
+        #     print ("key is", key)
+        #     df_final[u'年度'] = df[u'年度']
+        #     df_final[u'股本'] = df[u'股本(億)']
+        #     df_final[u'營收(億)'] = df[u'營業收入(億)']
+        #     df_final[u'稅後淨利(億)'] = df[u'稅後淨利(億)']
+        #     df_final[u'毛利(%)'] = df[u'營業毛利(%)']
+        #     df_final[u'營益(%)'] = df[u'營業利益(%)']
+        #     df_final[u'ROE'] = df[u'ROE(%)']
+        #     df_final[u'EPS'] = df[u'稅後EPS(元)']
+        # elif key == u'股利統計':
+        #     print("key is", key)
+        #     df_final[u'現金'] = df[u'股利現金(元)']
+        #     df_final[u'股票'] = df[u'股利股票(元)']
+        #     df_final[u'股利合計'] = df[u'股利合計(元)']
+        #
+        #     # 高低價差
+        #     h = df[u'股價最高']
+        #     l = df[u'股價最低']
+        #
+        #     count = 0
+        #     for hh in h:
+        #         if hh == u'-':
+        #             break
+        #         count = count + 1
+        #
+        #     if count > 10:
+        #         count = 10
+        #     # print count
+        #
+        #     h = h[:count]
+        #     l = l[:count]
+        #     # raw_input()
+        #     h = pd.to_numeric(h)
+        #     l = pd.to_numeric(l)
+        #     df_final[u'高低價差'] = h - l
+        #     df_final[u'最高價'] = df[u'股價最高']
+        #     df_final[u'最低價'] = df[u'股價最低']
+        # elif key == u'PER/PBR':
+        #     print("key is", key)
+        #     df_final[u'最高本益比'] = df[u'最高PER']
+        #     df_final[u'最低本益比'] = df[u'最低PER']
+        #     df_final[u'收盤平均價'] = df[u'股價平均(元)']
+        #     df_final[u'平均本益比'] = df[u'平均PER']
+        #     # print df_final[u'平均本益比']
+        #     # raw_input()
 
         key = key.replace('/', '_')
 
@@ -161,11 +163,11 @@ def GetHtmlcode(ID):
             f.write(df.to_html())
             f.write(FOOTER)
 
-    key = str(ID) + '/基本資料表.html'
-    with open(str(key), 'w', encoding='utf-8') as f:
-        f.write(HEADER)
-        f.write(df_final.to_html(classes='df_final'))
-        f.write(FOOTER)
+    # key = str(ID) + '/基本資料表.html'
+    # with open(str(key), 'w', encoding='utf-8') as f:
+    #     f.write(HEADER)
+    #     f.write(df_final.to_html(classes='df_final'))
+    #     f.write(FOOTER)
 
     return soup
 

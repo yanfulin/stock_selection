@@ -7,7 +7,8 @@ import time
 from bs4 import BeautifulSoup
 import pandas as pd
 
-
+# this can disable the requests warnings.
+requests.packages.urllib3.disable_warnings()
 def GetHtmlcode(ID):
     # Get the webpage's source html code
     source = 'https://goodinfo.tw/StockInfo/StockBzPerformance.asp?STOCK_ID='

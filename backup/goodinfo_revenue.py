@@ -7,6 +7,7 @@ import time
 from bs4 import BeautifulSoup
 import pandas as pd
 
+requests.packages.urllib3.disable_warnings()
 
 def GetHtmlcode(ID):
     # Get the webpage's source html code
@@ -191,7 +192,7 @@ def main():
     #reload(sys)
     #sys.setdefaultencoding('utf-8')
 
-    fin = open('StockCode', 'r+')
+    fin = open('../StockCode', 'r+')
     StockCodeList = [str(i) for i in fin.read().splitlines()]
     fin.close()
 
