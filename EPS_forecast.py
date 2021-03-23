@@ -95,13 +95,18 @@ def GetEPScode(ID):
         res.encoding = 'utf-8'
         soup = BeautifulSoup(res.text.replace('&nbsp;', '').replace('　', ''), 'lxml')
         #[s.extract() for s in soup('thead')] # remove thead
-        [s.extract() for s in soup.find_all('td', style=re.compile(r"color:blue;width:25%"))]
+        #[s.find_parent('tr').extract() for s in soup.find_all('td', style=re.compile(r"color:blue;width:25%"))]
+        [s.find_parent('tr').extract() for s in soup.find_all('td', style=lambda value: value and 'color:blue' in value)[1:]]
         #print (soup.text)
         df = pd.read_html(str(soup))[1]
         #print(df)
         #df.columns = columns[key]
         df.columns = df.iloc[0]
-        print(df.head(30))
+        df.drop(columns=['0'])
+        df.reset_index()
+        #df.drop([0])
+        #print(df[2:])
+        print(df.head(40))
 
         key = key.replace('/', '_')
 
