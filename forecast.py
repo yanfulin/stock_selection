@@ -20,7 +20,7 @@ filelist = ["5Y", "10Y", "ALL"]
 # Set Folder Targets for Revenue Info
 # Based on 5/10/All year revenue to do the coming 5 year forecast
 for file in filelist:
-    stock_id = "2330"
+    stock_id = "5534"
     file_html =str(file)+".html"
     stock_revenue_file = Path.cwd() / stock_id / file_html
     df=pd.read_html(stock_revenue_file)[0]

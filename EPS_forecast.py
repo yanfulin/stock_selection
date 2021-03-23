@@ -6,8 +6,10 @@ import os
 import time
 from bs4 import BeautifulSoup
 import pandas as pd
+import re
 
 #TODO: estimate the quarterly EPS
+#TODO: estimate the yearly EPS, backward 4Q PES, forward 4Q PES
 
 # get the monthly revenue and convert it to quarterly data (use resample("Q"))
 # get the historical EPS per quarter
@@ -39,13 +41,33 @@ def GetEPScode(ID):
                'referer': url,
                'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'}
 
+    # < option
+    # value = 'XX_M_QUAR' > 合併報表 – 單季 < / option >
+    # < option
+    # value = 'XX_M_QUAR_ACC' > 合併報表 – 累季 < / option >
+    # < option
+    # value = 'XX_M_YEAR'
+    # selected > 合併報表 – 年度 < / option >
+    # < option
+    # value = 'XX_M_Y4Q' > 合併報表 – 近四季 < / option >
+    # < option
+    # value = 'XX_QUAR' > 個別報表 – 單季 < / option >
+
     payload = {
+        'STEP': 'DATA',
         'STOCK_ID': ID,
-        'REP_CAT': 'XX_M_QUAR_ACC'}
+        'RPT_CAT': 'XX_M_QUAR',
+        #'RPT_CAT':'XX_M_QUAR_ACC'
+        # 'RPT_CAT': 'XX_M_YEAR'
+        # 'QRY_TIME': '20204'
+        # 'RPT_CAT':'XX_M_Y4Q'
+        # 'QRY_TIME': '2020'
+        #'QRY_TIME': '20204'
+        }
 
-    SHEETS = ['Quarter_EPS']
+    SHEETS = ['XX_M_QUAR']
 
-    columns = {'Quarter_EPS': ['2020Q3', '2020Q2', '2020Q1',
+    columns = {'XX_M_QUAR': ['2004Q4','2020Q3', '2020Q2', '2020Q1',
                                   '2019Q4', '2019Q3', '2019Q2', '2019Q1',
                                   '2018Q4', '2018Q3', '2091Q2'],
                'Quarter_EPS2': ['Q1', 'Q2', 'Q3', 'Q4',
@@ -66,16 +88,20 @@ def GetEPScode(ID):
     '''
 
     for key in SHEETS:
-        payload['CHT_CAT'] = key
+        payload['RPT_CAT'] = key
 
         res = requests.post('https://goodinfo.tw/StockInfo/StockFinDetail.asp?', headers=headers, verify=False,
                             data=payload)
         res.encoding = 'utf-8'
         soup = BeautifulSoup(res.text.replace('&nbsp;', '').replace('　', ''), 'lxml')
-        [s.extract() for s in soup('thead')]  # remove thead
+        #[s.extract() for s in soup('thead')] # remove thead
+        [s.extract() for s in soup.find_all('td', style=re.compile(r"color:blue;width:25%"))]
+        #print (soup.text)
         df = pd.read_html(str(soup))[1]
-        df.columns = columns[key]
-        print(df)
+        #print(df)
+        #df.columns = columns[key]
+        df.columns = df.iloc[0]
+        print(df.head(30))
 
         key = key.replace('/', '_')
 
