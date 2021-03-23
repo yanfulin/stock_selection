@@ -102,8 +102,12 @@ def GetEPScode(ID):
         #print(df)
         #df.columns = columns[key]
         df.columns = df.iloc[0]
-        df.drop(columns=['0'])
-        df.reset_index()
+        #df.index.name = "Financial_Ratio"
+        df.columns.name =""
+        print ("index name=", df.index.name)
+        print("columns name=", df.columns.name)
+        df=df.drop([0])
+        df=df.reset_index(drop=True)
         #df.drop([0])
         #print(df[2:])
         print(df.head(40))
