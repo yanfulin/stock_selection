@@ -104,13 +104,30 @@ def GetEPScode(ID):
         df.columns = df.iloc[0]
         #df.index.name = "Financial_Ratio"
         df.columns.name =""
-        print ("index name=", df.index.name)
-        print("columns name=", df.columns.name)
-        df=df.drop([0])
-        df=df.reset_index(drop=True)
-        #df.drop([0])
-        #print(df[2:])
-        print(df.head(40))
+        print(df)
+        #print ("index name=", df.index.name)
+        #print("columns name=", df.columns.name)
+        df=df.drop([0]).T
+
+        df.columns = df.iloc[0]
+
+        df.columns.name =""
+        df = df.drop(["獲利能力"])
+
+        print (df)
+
+        #print(df[["獲利能力"]].head(20))
+        #EPS = df[df["獲利能力"]=="每股稅後盈餘(元)"].T
+        EPS=df[["每股稅後盈餘(元)"]]
+        EPS["每股稅後盈餘(元)"]=EPS["每股稅後盈餘(元)"].astype(float)
+        EPS["date"] = pd.to_datetime(EPS.index)
+        EPS["date"]=EPS["date"].dt.to_period("Q").dt.end_time
+
+        print(EPS)
+        print(EPS.dtypes)
+        #print (EPS["每股稅後盈餘(元)"])
+        print(EPS["2020"], EPS["2020"].sum())
+
 
         key = key.replace('/', '_')
 
