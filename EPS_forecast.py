@@ -104,7 +104,7 @@ def GetEPScode(ID):
         df.columns = df.iloc[0]
         #df.index.name = "Financial_Ratio"
         df.columns.name =""
-        print(df)
+        #print(df)
         #print ("index name=", df.index.name)
         #print("columns name=", df.columns.name)
         df=df.drop([0]).T
@@ -114,19 +114,19 @@ def GetEPScode(ID):
         df.columns.name =""
         df = df.drop(["獲利能力"])
 
-        print (df)
+        #print (df)
 
         #print(df[["獲利能力"]].head(20))
         #EPS = df[df["獲利能力"]=="每股稅後盈餘(元)"].T
-        EPS=df[["每股稅後盈餘(元)"]]
+        EPS=df[["稅後淨利率(母公司)","每股稅後盈餘(元)"]]
         EPS["每股稅後盈餘(元)"]=EPS["每股稅後盈餘(元)"].astype(float)
+        EPS["稅後淨利率(母公司)"] = EPS["稅後淨利率(母公司)"].astype(float)
         EPS["date"] = pd.to_datetime(EPS.index)
-        EPS["date"]=EPS["date"].dt.to_period("Q").dt.end_time
-
+        #EPS["date"]=EPS["date"].dt.to_period("Q").dt.end_time.dt.date
+        EPS["quarter_end"] = EPS["date"].dt.to_period("Q").dt.end_time
+        EPS["quarter_end"] = EPS["quarter_end"].dt.strftime("%Y-%m-%d")
+        EPS=EPS.set_index("quarter_end")
         print(EPS)
-        print(EPS.dtypes)
-        #print (EPS["每股稅後盈餘(元)"])
-        print(EPS["2020"], EPS["2020"].sum())
 
 
         key = key.replace('/', '_')
@@ -140,6 +140,9 @@ def GetEPScode(ID):
             f.write(HEADER)
             f.write(df.to_html())
             f.write(FOOTER)
+
+        EPS_file = str(ID) + '/' + 'EPS_per_quarter.csv'
+        EPS.to_csv(EPS_file)
 
     return soup
 

@@ -8,12 +8,41 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from fbprophet import Prophet
 
-def forecast(stock_id, year=5):
+def make_forecast(stock_id):
+    filelist = ["5Y", "10Y", "ALL"]
+
+    # Set Folder Targets for Revenue Info
+    # Based on 5/10/All year revenue to do the coming 5 year forecast
+    for file in filelist:
+        file_html =str(file)+".html"
+        stock_revenue_file = Path.cwd() / stock_id / file_html
+        df=pd.read_html(stock_revenue_file)[0]
+        col=["月別", "單月營收(億)"]
+        df=df[col]
+        df.columns=["ds", "y"]
+        df.ds=pd.to_datetime(df.ds)
+        #print(df.head())
+        m1=Prophet()
+        m1.fit(df)
+        future1 = m1.make_future_dataframe(periods=60, freq='MS')
+        forecast1 = m1.predict(future1)
+        #print(forecast1.dtypes)
+        #print (forecast1[['ds', 'yhat', 'yhat_lower', 'yhat_upper']])
+        if not os.path.exists(stock_id):
+            os.makedirs(stock_id)
+        if not os.path.exists(f'{stock_id}/forecast/'):
+            os.makedirs(f'{stock_id}/forecast/')
+        forecast1.to_csv(f'{stock_id}/forecast/{file}.csv')
+
+def get_forecast(stock_id, year=5):
     stock_revenue_file = Path.cwd() / stock_id / "ALL.html"
     df = pd.read_html(stock_revenue_file)[0]
     col = ["月別", "單月營收(億)"]
     df = df[col]
     df.columns = ["ds", "y"]
+    df['forecast']='Actual'
+    print("forecast is actual????")
+    print(df.head())
     df.ds = pd.to_datetime(df.ds)
 
     df_5Y = pd.read_csv(f"{stock_id}/forecast/5Y.csv")
@@ -36,15 +65,17 @@ def forecast(stock_id, year=5):
         df["merged"] = np.where(df.y.isna(), df["10Y_yhat"], df.y)
     else:
         df["merged"] = np.where(df.y.isna(), df["ALL_yhat"], df.y)
+    df["forecast"] = np.where(df.forecast.isna(), "forecast", "actual")
     print(df.head())
     print(df[(df.ds > "2020-12") & (df.ds < "2022-1")])
-    return df[["ds","merged"]]
+    return df[["ds","merged","forecast"]]
 
-def plot_forecast(df):
+def plot_forecast(df,stock_id):
     fig, ax = plt.subplots(figsize=(9, 6))
     # df.plot(kind='line', x='ds', y=["y", "ALL_yhat", "10Y_yhat", "5Y_yhat"], ax=ax)
     df.plot(kind='line', x='ds', y=["merged"], ax=ax)
     fig.autofmt_xdate(bottom=0.2, rotation=30, ha='right')
+    plt.title(f"STOCK ID ={stock_id}")
     plt.show(block=True)
     plt.interactive(False)
 
