@@ -24,7 +24,7 @@ requests.packages.urllib3.disable_warnings()
 
 
 def GetEPScode(ID):
-    # Get the webpage's source html code
+    # Get the webpage's source html code 財務比率表 (合併)
     source = 'https://goodinfo.tw/StockInfo/StockFinDetail.asp?STOCK_ID='
     url = source + ID
     print(url)
@@ -64,15 +64,15 @@ def GetEPScode(ID):
         # 'QRY_TIME': '2020'
         #'QRY_TIME': '20204'
         }
-
+    # value = 'XX_M_QUAR' > 合併報表 – 單季 < / option >
     SHEETS = ['XX_M_QUAR']
 
-    columns = {'XX_M_QUAR': ['2004Q4','2020Q3', '2020Q2', '2020Q1',
-                                  '2019Q4', '2019Q3', '2019Q2', '2019Q1',
-                                  '2018Q4', '2018Q3', '2091Q2'],
-               'Quarter_EPS2': ['Q1', 'Q2', 'Q3', 'Q4',
-                                  'Q5', 'Q6', 'Q7', 'Q8',
-                                  'Q9', 'Q10']}
+    # columns = {'XX_M_QUAR': ['2004Q4','2020Q3', '2020Q2', '2020Q1',
+    #                               '2019Q4', '2019Q3', '2019Q2', '2019Q1',
+    #                               '2018Q4', '2018Q3', '2091Q2'],
+    #            'Quarter_EPS2': ['Q1', 'Q2', 'Q3', 'Q4',
+    #                               'Q5', 'Q6', 'Q7', 'Q8',
+    #                               'Q9', 'Q10']}
 
     HEADER = '''
     <!DOCTYPE html> 
@@ -96,21 +96,17 @@ def GetEPScode(ID):
         soup = BeautifulSoup(res.text.replace('&nbsp;', '').replace('　', ''), 'lxml')
         #[s.extract() for s in soup('thead')] # remove thead
         #[s.find_parent('tr').extract() for s in soup.find_all('td', style=re.compile(r"color:blue;width:25%"))]
+        #找到td style = color:blue ,然後往上一層找tr, extract結果
         [s.find_parent('tr').extract() for s in soup.find_all('td', style=lambda value: value and 'color:blue' in value)[1:]]
-        #print (soup.text)
+
         df = pd.read_html(str(soup))[1]
-        #print(df)
-        #df.columns = columns[key]
+        # duplicate the first row as the columns name
         df.columns = df.iloc[0]
         #df.index.name = "Financial_Ratio"
         df.columns.name =""
-        #print(df)
-        #print ("index name=", df.index.name)
-        #print("columns name=", df.columns.name)
         df=df.drop([0]).T
 
         df.columns = df.iloc[0]
-
         df.columns.name =""
         df = df.drop(["獲利能力"])
 

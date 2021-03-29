@@ -10,6 +10,9 @@ import matplotlib
 from fbprophet import Prophet
 import time
 import forecast_comparison
+import EPS_forecast
+import goodinfo_revenue_monthly
+import goodinfo2
 
 ## Set Date Formats
 # today_string = datetime.datetime.today().strftime('%m%d%Y_%I%p')
@@ -59,6 +62,9 @@ def main():
 
     for stock_id in StockCodeList:
         print ("ID=", stock_id)
+        goodinfo2.GetHtmlcode(stock_id)
+        goodinfo_revenue_monthly.GetHtmlcode(stock_id)
+        EPS_forecast.GetEPScode(stock_id)
         forecast_comparison.make_forecast(stock_id)
         forecast_5y=forecast_comparison.get_forecast(stock_id, 5)
         forecast_5y.to_csv(f'{stock_id}/forecast/forecast_actual_merged.csv')
