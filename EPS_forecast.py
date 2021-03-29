@@ -120,7 +120,7 @@ def GetEPScode(ID):
         #EPS = df[df["獲利能力"]=="每股稅後盈餘(元)"].T
         EPS=df[["稅後淨利率(母公司)","每股稅後盈餘(元)"]]
         EPS["每股稅後盈餘(元)"]=EPS["每股稅後盈餘(元)"].astype(float)
-        EPS["稅後淨利率(母公司)"] = EPS["稅後淨利率(母公司)"].astype(float)
+        EPS["稅後淨利率(母公司)"] = EPS["稅後淨利率(母公司)"].astype(float)*0.01
         EPS["date"] = pd.to_datetime(EPS.index)
         #EPS["date"]=EPS["date"].dt.to_period("Q").dt.end_time.dt.date
         EPS["quarter_end"] = EPS["date"].dt.to_period("Q").dt.end_time
@@ -128,6 +128,25 @@ def GetEPScode(ID):
         EPS=EPS.set_index("quarter_end")
         print(EPS)
 
+        # add column "Quarter" and "Year" and "EPS estimation"
+        Q1_month = [1, 2, 3]
+        Q2_month = [4, 5, 6]
+        Q3_month = [7, 8, 9]
+        Q4_month = [10, 11, 12]
+        print(EPS.info)
+        print(EPS.dtypes)
+
+        EPS["Year"] = EPS.date.dt.year
+        EPS["Month"] = EPS.date.dt.month
+        for index, row in EPS.iterrows():
+            if row['Month'] in Q1_month:
+                EPS.loc[index, 'Quarter'] = 'Q1'
+            elif row['Month'] in Q2_month:
+                EPS.loc[index, 'Quarter'] = 'Q2'
+            elif row['Month']in Q3_month:
+                EPS.loc[index, 'Quarter'] = 'Q3'
+            else:
+                EPS.loc[index, 'Quarter'] = 'Q4'
 
         key = key.replace('/', '_')
 
