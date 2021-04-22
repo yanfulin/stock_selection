@@ -52,9 +52,7 @@ import goodinfo2
 # forecast_comparison.plot_forecast(forecast_5y)
 
 def main():
-    # python2
-    #reload(sys)
-    #sys.setdefaultencoding('utf-8')
+
 
     fin = open('StockCode', 'r+')
     StockCodeList = [str(i) for i in fin.read().splitlines()]
@@ -67,8 +65,9 @@ def main():
         EPS_forecast.GetEPScode(stock_id)
         forecast_comparison.make_forecast(stock_id)
         forecast_5y=forecast_comparison.get_forecast(stock_id, 5)
+        print("forecast==>", forecast_5y)
         forecast_5y.to_csv(f'{stock_id}/forecast/forecast_actual_merged.csv')
-        #forecast_comparison.plot_forecast(forecast_5y, stock_id)
+        forecast_comparison.plot_forecast(forecast_5y, stock_id)
         time.sleep(10)
 
 

@@ -100,6 +100,7 @@ def GetEPScode(ID):
         [s.find_parent('tr').extract() for s in soup.find_all('td', style=lambda value: value and 'color:blue' in value)[1:]]
 
         df = pd.read_html(str(soup))[1]
+
         # duplicate the first row as the columns name
         df.columns = df.iloc[0]
         #df.index.name = "Financial_Ratio"

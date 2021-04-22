@@ -37,8 +37,11 @@ def make_forecast(stock_id):
 def get_forecast(stock_id, year=5):
     stock_revenue_file = Path.cwd() / stock_id / "ALL.html"
     EPS_per_quarte_file= Path.cwd() / stock_id / "EPS_per_quarter.csv"
+    Balance_Sheet_file = Path.cwd() / stock_id / "Balance_Sheet_BS_M_QUAR.html"
     df = pd.read_html(stock_revenue_file)[0]
     df_EPS = pd.read_csv(EPS_per_quarte_file)
+    df_BS = pd.read_html(Balance_Sheet_file)[0]
+
     col = ["月別", "單月營收(億)"]
     df = df[col]
     df.columns = ["ds", "y"]
@@ -99,7 +102,10 @@ def get_forecast(stock_id, year=5):
 
     ##Todo get the captital for each stock from balance sheet
     # I put TSMC capital below to verify the formula first. This is to be udpated.
-    df["capital"] = 2593
+
+    df["capital"] = df_BS.loc[0,"普通股股本"]
+    #df["capital"] = 2593
+    #print("普通股股本", df["capital"])
     df["EPS_forecast"]=df["merged"]*df["EPS_ratio"]/df["capital"] * 10
 
 

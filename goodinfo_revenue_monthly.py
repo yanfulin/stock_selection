@@ -71,6 +71,7 @@ def GetHtmlcode(ID):
         [s.extract() for s in soup('thead')]  # remove thead
         df = pd.read_html(str(soup))[1]
         df.columns = columns[key]
+        df.columns.name = ""
         print (df)
 
         key = key.replace('/', '_')
