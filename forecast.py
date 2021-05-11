@@ -12,6 +12,7 @@ import time
 import forecast_comparison
 import EPS_forecast
 import goodinfo_revenue_monthly
+import goodinfo_balance_sheet
 import goodinfo2
 
 ## Set Date Formats
@@ -62,13 +63,15 @@ def main():
         print ("ID=", stock_id)
         goodinfo2.GetHtmlcode(stock_id)
         goodinfo_revenue_monthly.GetHtmlcode(stock_id)
+        goodinfo_balance_sheet.Get_Balance_sheet_code(stock_id)
+        goodinfo_balance_sheet.Get_Income_statement_code(stock_id)
         EPS_forecast.GetEPScode(stock_id)
         forecast_comparison.make_forecast(stock_id)
-        forecast_5y=forecast_comparison.get_forecast(stock_id, 5)
-        print("forecast==>", forecast_5y)
-        forecast_5y.to_csv(f'{stock_id}/forecast/forecast_actual_merged.csv')
-        forecast_comparison.plot_forecast(forecast_5y, stock_id)
-        time.sleep(10)
+        forecast_10y=forecast_comparison.get_forecast(stock_id, 10)
+        print("forecast==>", forecast_10y)
+        forecast_10y.to_csv(f'{stock_id}/forecast/forecast_actual_merged.csv')
+        forecast_comparison.plot_forecast(forecast_10y, stock_id)
+        #time.sleep(10)
 
 
 if __name__ == "__main__":
