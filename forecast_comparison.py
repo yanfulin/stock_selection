@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from fbprophet import Prophet
 
 def make_forecast(stock_id):
+    print("start to make forecast for stock_id = ", stock_id)
     filelist = ["5Y", "10Y", "ALL"]
 
     # Set Folder Targets for Revenue Info
@@ -35,6 +36,7 @@ def make_forecast(stock_id):
         forecast1.to_csv(f'{stock_id}/forecast/{file}.csv')
 
 def get_forecast(stock_id, year=10):
+    print("start to get forecast for stock_id = ", stock_id)
     stock_revenue_file = Path.cwd() / stock_id / "ALL.html"
     EPS_per_quarte_file= Path.cwd() / stock_id / "EPS_per_quarter.csv"
     Balance_Sheet_file = Path.cwd() / stock_id / "Balance_Sheet_BS_M_QUAR.html"
@@ -114,6 +116,7 @@ def get_forecast(stock_id, year=10):
     return df[["ds","merged","forecast","Quarter","Year","capital", "EPS_ratio", "EPS_forecast"]]
 
 def plot_forecast(df,stock_id):
+    print("start to plot forecast for stock_id = ", stock_id)
     fig, ax = plt.subplots(figsize=(9, 6))
     # df.plot(kind='line', x='ds', y=["y", "ALL_yhat", "10Y_yhat", "5Y_yhat"], ax=ax)
     df.plot(kind='line', x='ds', y=["merged"], ax=ax)
