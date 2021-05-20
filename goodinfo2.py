@@ -6,6 +6,9 @@ import os
 import time
 from bs4 import BeautifulSoup
 import pandas as pd
+from pathlib import Path
+from openpyxl import load_workbook
+
 
 # this can disable the requests warnings.
 requests.packages.urllib3.disable_warnings()
@@ -14,6 +17,8 @@ def GetHtmlcode(ID):
     source = 'https://goodinfo.tw/StockInfo/StockBzPerformance.asp?STOCK_ID='
     url = source + ID
     #print (url)
+    source_dividend = 'https://goodinfo.tw/StockInfo/StockDividendPolicy.asp?'
+
 
     # Header
     headers = {'accept': '*/*',
@@ -37,8 +42,13 @@ def GetHtmlcode(ID):
         u'SHEET': '獲利指標'}
         # 'SHEET': 'PER/PBR'}
 
+    payload_dividend = {
+        u'STOCK_ID': ID,
+        u'SHEET': '股利所屬年度'}
 
-    SHEETS = ['獲利指標', '年增統計', 'PER/PBR']
+
+
+    SHEETS = ['獲利指標', '年增統計', 'PER/PBR', '股利所屬年度']
 
     columns = {'獲利指標': ['年度', '股本(億)', '財報評分', '股價收盤', '股價平均', u'股價漲跌', u'股價漲跌(%)', u'營業收入(億)', u'營業毛利(億)',
                          u'營業利益(億)', u'業外損益(億)', u'稅後淨利(億)', u'營業毛利(%)', u'營業利益(%)', u'業外損益(%)', u'稅後淨利(%)', u'ROE(%)',
@@ -54,7 +64,12 @@ def GetHtmlcode(ID):
 
                u'PER/PBR': [u'年度', u'股本(億)', u'財報評分', u'股價最高(元)', u'股價最低(元)', u'股價收盤(元)', u'股價平均(元)', u'股價漲跌(元)',
                             u'股價漲跌(%)', u'EPS(元)', u'最高PER', u'最低PER', u'平均PER', u'BPS(元)', u'最高PBR', u'最低PBR',
-                            u'平均PBR']}
+                            u'平均PBR'],
+               u'股利所屬年度': [u'股利所屬年度', u'股利發放年度',u'現金股利盈餘',u'現金股利公積',u'現金股利合計',u'股票股利盈餘',u'股票股利公積',u'股票股利合計',
+                          u'股利合計',u'股利現金總計(億)', u'股利股票總計(千張)',u'填息花費日數',u'填權花費日數', u'股價年度', u'股價統計最高(元)',
+                          u'股價統計最低(元)',u'股價統計平均(元)',u'年均殖利率現金(%)',u'年均殖利率股票(%)',u'年均殖利率合計(%)',u'股利所屬期間',
+                          u'EPS(元)',u'盈餘分配率配息(%)',u'盈餘分配率配股(%)',u'盈餘分配率合計(%)']
+               }
 
     HEADER = '''
     <!DOCTYPE html> 
@@ -71,6 +86,7 @@ def GetHtmlcode(ID):
 
     labels = [u'年度',
               u'股本',
+              u'財報評分',
               u'營收(億)',
               u'稅後淨利(億)',
               u'毛利(%)',
@@ -89,18 +105,26 @@ def GetHtmlcode(ID):
               u'最低本益比',
               u'日期',
               u'收盤平均價',
-              u'平均本益比']
+              u'平均本益比',
+              'BPS',
+              '最高PBR',
+              '最低PBR',
+              '平均PBR'
+              ]
 
-    w, h = 21, 10
+    w, h = 26, 20
     raw_data = [['-' for x in range(w)] for y in range(h)]
     df_final = pd.DataFrame(raw_data, columns=labels)
 
     for key in SHEETS:
         payload['SHEET'] = key
-        res = requests.post('https://goodinfo.tw/StockInfo/StockBzPerformance.asp?', headers=headers, verify=False,
-                            data=payload)
+        if key != '股利所屬年度':
+            res = requests.post('https://goodinfo.tw/StockInfo/StockBzPerformance.asp?', headers=headers, verify=False, data=payload)
+        else:
+            res = requests.post(source_dividend, headers=headers, verify=False, data=payload_dividend)
         res.encoding = 'utf-8'
-        print(res.url)
+        #print(res.url)
+        #print(res.text)
         soup = BeautifulSoup(res.text.replace('&nbsp;', '').replace('　', ''), 'lxml')
         [s.extract() for s in soup('thead')]  # remove thead
 
@@ -112,12 +136,14 @@ def GetHtmlcode(ID):
             print ("key is", key)
             df_final[u'年度'] = df[u'年度']
             df_final[u'股本'] = df[u'股本(億)']
+            df_final[u'財報評分'] = df[u'財報評分']
             df_final[u'營收(億)'] = df[u'營業收入(億)']
             df_final[u'稅後淨利(億)'] = df[u'稅後淨利(億)']
             df_final[u'毛利(%)'] = df[u'營業毛利(%)']
             df_final[u'營益(%)'] = df[u'營業利益(%)']
             df_final[u'ROE'] = df[u'ROE(%)']
             df_final[u'EPS'] = df[u'稅後EPS(元)']
+
         elif key == u'股利統計':
             print("key is", key)
             df_final[u'現金'] = df[u'股利現金(元)']
@@ -152,8 +178,26 @@ def GetHtmlcode(ID):
             df_final[u'最低本益比'] = df[u'最低PER']
             df_final[u'收盤平均價'] = df[u'股價平均(元)']
             df_final[u'平均本益比'] = df[u'平均PER']
+            df_final[u'最高價'] = df[u'股價最高(元)']
+            df_final[u'最低價'] = df[u'股價最低(元)']
+            df_final[u'BPS'] = df[u'BPS(元)']
+            df_final[u'最高PBR'] = df[u'最高PBR']
+            df_final[u'最低PBR'] = df[u'最低PBR']
+            df_final[u'平均PBR'] = df[u'平均PBR']
+
+
             # print df_final[u'平均本益比']
             # raw_input()
+        elif key == u'股利所屬年度':
+            print("key is", key)
+            result = pd.merge(df_final, df,  left_on='年度', right_on='股利所屬年度', how="left")
+            # df_final[u'現金'] = df[u'現金股利合計']
+            # df_final[u'股票'] = df[u'股票股利合計']
+            # df_final[u'股利合計'] = df[u'股利合計']
+            df_final = result
+
+            #df_final[u'平均本益比'] = df[u'平均PER']
+
 
         key = key.replace('/', '_')
 
@@ -174,6 +218,17 @@ def GetHtmlcode(ID):
         f.write(HEADER)
         f.write(df_final.to_html(classes='df_final'))
         f.write(FOOTER)
+
+
+
+    Excel_file = Path.cwd() / "stocks.xlsx"
+    book = load_workbook(Excel_file)
+    with pd.ExcelWriter(Excel_file, engine='openpyxl') as writer:
+        writer.book = book
+        writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
+        df_final.to_excel(writer, ID, index=False)
+        writer.save()
+
 
     return soup
 
