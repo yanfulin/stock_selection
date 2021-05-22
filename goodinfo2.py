@@ -88,11 +88,29 @@ def GetHtmlcode(ID):
               u'股本',
               u'財報評分',
               u'營收(億)',
+              # u'稅後淨利(億)',
+              # u'毛利(%)',
+              # u'營益(%)',
+              # u'ROE',
+              # u'EPS',
+              '股價收盤',
+              '股價平均',
+              u'股價漲跌',
+              u'股價漲跌(%)',
+              u'營業收入(億)',
+              u'營業毛利(億)',
+              u'營業利益(億)',
+              u'業外損益(億)',
               u'稅後淨利(億)',
-              u'毛利(%)',
-              u'營益(%)',
-              u'ROE',
-              u'EPS',
+              u'營業毛利(%)',
+              u'營業利益(%)',
+              u'業外損益(%)',
+              u'稅後淨利(%)',
+              u'ROE(%)',
+              u'ROA(%)',
+              u'稅後EPS(元)',
+              u'成長(元)',
+              u'BPS(元)'
               u'獲利矩陣',
               u'現金',
               u'股票',
@@ -112,7 +130,7 @@ def GetHtmlcode(ID):
               '平均PBR'
               ]
 
-    w, h = 26, 20
+    w, h = 38, 20
     raw_data = [['-' for x in range(w)] for y in range(h)]
     df_final = pd.DataFrame(raw_data, columns=labels)
 
@@ -130,19 +148,42 @@ def GetHtmlcode(ID):
 
         df = pd.read_html(str(soup))[0]
         df.columns = columns[key]
-        #print (df)
+        #print (df.info)
 
         if key == u'獲利指標':
             print ("key is", key)
             df_final[u'年度'] = df[u'年度']
             df_final[u'股本'] = df[u'股本(億)']
             df_final[u'財報評分'] = df[u'財報評分']
+
             df_final[u'營收(億)'] = df[u'營業收入(億)']
             df_final[u'稅後淨利(億)'] = df[u'稅後淨利(億)']
             df_final[u'毛利(%)'] = df[u'營業毛利(%)']
             df_final[u'營益(%)'] = df[u'營業利益(%)']
             df_final[u'ROE'] = df[u'ROE(%)']
             df_final[u'EPS'] = df[u'稅後EPS(元)']
+
+            df_final['股價收盤'] = df['股價收盤']
+            df_final['股價平均'] = df['股價平均']
+            df_final[u'股價漲跌'] = df[u'股價漲跌']
+            df_final[u'股價漲跌(%)'] = df[u'股價漲跌(%)']
+
+            df_final[u'營業收入(億)'] = df[u'營業收入(億)']
+            df_final[u'營業毛利(億)'] = df[u'營業毛利(億)']
+            df_final[u'營業利益(億)'] = df[u'營業利益(億)']
+            df_final[u'業外損益(億)'] = df[u'業外損益(億)']
+            df_final[u'稅後淨利(億)'] = df[u'稅後淨利(億)']
+            df_final[u'營業毛利(%)'] = df[u'營業毛利(%)']
+            df_final[u'營業利益(%)'] = df[u'營業利益(%)']
+            df_final[u'業外損益(%)'] = df[u'業外損益(%)']
+            df_final[u'稅後淨利(%)'] = df[u'稅後淨利(%)']
+            df_final[u'ROE(%)'] = df[u'ROE(%)']
+            df_final[u'ROA(%)'] = df[u'ROA(%)']
+            df_final[u'稅後EPS(元)'] = df[u'稅後EPS(元)']
+            df_final[u'成長(元)'] = df[u'成長(元)']
+            df_final[u'BPS(元)'] = df[u'BPS(元)']
+
+
 
         elif key == u'股利統計':
             print("key is", key)
@@ -190,6 +231,11 @@ def GetHtmlcode(ID):
             # raw_input()
         elif key == u'股利所屬年度':
             print("key is", key)
+            #df = df.drop(df.index[-1])
+
+            df_final['年度']=df_final['年度'].astype(object)
+            # print (df.dtypes)
+            # print (df_final.dtypes)
             result = pd.merge(df_final, df,  left_on='年度', right_on='股利所屬年度', how="left")
             # df_final[u'現金'] = df[u'現金股利合計']
             # df_final[u'股票'] = df[u'股票股利合計']
@@ -221,7 +267,7 @@ def GetHtmlcode(ID):
 
 
 
-    Excel_file = Path.cwd() / "stocks.xlsx"
+    Excel_file = Path.cwd() / "stocks2.xlsx"
     book = load_workbook(Excel_file)
     with pd.ExcelWriter(Excel_file, engine='openpyxl') as writer:
         writer.book = book
