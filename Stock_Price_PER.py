@@ -100,7 +100,7 @@ def export_to_excel2():
             EPS = GetEPS(stock)
             PER_max, PER_avg, PER_min = GetPER(stock)
             EPS_quarterly, size=GetEPS_per_quauter(stock)
-            sheet.cell(row=index, column=18).value = EPS[0]
+            sheet.cell(row=index, column=18).value = EPS_quarterly[-4:].sum()
             sheet.cell(row=index, column=19).value = EPS[1]
             sheet.cell(row=index, column=20).value = EPS[2]
             sheet.cell(row=index, column=21).value = PER_max

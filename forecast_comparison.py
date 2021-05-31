@@ -139,7 +139,7 @@ def get_forecast2(stock_id, year=10):
     df = pd.read_html(stock_revenue_file)[0]
     df_EPS = pd.read_csv(EPS_per_quarte_file)
     df_BS = pd.read_html(Balance_Sheet_file)[0]
-    df_Finance = pd.read_html(Finance_index_file )[0]
+    df_Finance = pd.read_html(Finance_index_file)[0]
 
     col = ["月別", "單月營收(億)"]
     df = df[col]
@@ -180,55 +180,64 @@ def get_forecast2(stock_id, year=10):
     df["Year"]=0
     this_year = date.today().year
     this_month = date.today().month
-    #this_quarter = date.today().dt.quarter
+    this_quarter = (this_month-1)//3+1
+    #print(date.today, this_year, this_month, this_quarter)
+
+    df_EPS["稅後淨利率(母公司)"] = (df_EPS["稅後淨利率(母公司)"]*1)
 
     for index, row in df.iterrows():
         year_row = row['ds'].year
-        month =row['ds'].month
-        quarter = row['ds'].quarter
+        month_row =row['ds'].month
+        quarter_row = row['ds'].quarter
 
         df.loc[index, "Year"]= year_row
-        df.loc[index, "Quarter"] = row['ds'].quarter
+        df.loc[index, "Quarter"] = quarter_row
+        print ("Row['ds']", row['ds'],  "Year is", year_row, "Month is", month_row, "Quarter is ", quarter_row)
 
-        print ("Row['ds']", row['ds'], "Year is", year_row, "Month is", month, "Quarter is ", quarter)
-        #month =row['ds'].month
-        if row['ds'].year < this_year-1:
-            df.loc[index, 'EPS_ratio']= df_Finance[df_Finance["Year"]== year_row]["稅後淨利(%)"].iloc[0]
-        elif row['ds'].year == this_year-1:
-            df.loc[index, 'EPS_ratio'] = \
-                df_EPS[(df_EPS["Year"] == year_row) & (df_EPS["Quarter"] == "Q"+str(row['ds'].quarter))]["稅後淨利率(母公司)"].iloc[0]
-        elif row['ds'].year == this_year:
-            if row['ds'].quarter < row['ds'].quarter:
-                df.loc[index, 'EPS_ratio'] = \
-                    df_EPS[(df_EPS["Year"] == year_row) & (df_EPS["Quarter"] == "Q"+str(row['ds'].quarter))]["稅後淨利率(母公司)"].iloc[0]
-            if row['ds'].quarter >= row['ds'].quarter:
-                df.loc[index, 'EPS_ratio'] =\
-                    df_EPS[(df_EPS["Year"] == year_row-1) & (df_EPS["Quarter"] == "Q"+str(row['ds'].quarter))]["稅後淨利率(母公司)"].iloc[0]
-        else:
-            df.loc[index, 'EPS_ratio'] = \
-                df_EPS[(df_EPS["Year"] == year_row-1) & (df_EPS["Quarter"] == "Q"+str(row['ds'].quarter))]["稅後淨利率(母公司)"].iloc[0]
+        if year_row < this_year-1:
 
-
-        for index, row in df.iterrows():
-            df.loc[index, "Year"] = row['ds'].year
-            # print (row, row['ds'].year, row['ds'].month)
-            month = row['ds'].month
-            if month in Q1_month:
-                Q_number = 'Q1'
-                df.loc[index, 'Quarter'] = Q_number
-                df.loc[index, 'EPS_ratio'] = df_EPS[df_EPS["Quarter"] == Q_number]["稅後淨利率(母公司)"].iloc[0]
-            elif month in Q2_month:
-                Q_number = 'Q2'
-                df.loc[index, 'Quarter'] = Q_number
-                df.loc[index, 'EPS_ratio'] = df_EPS[df_EPS["Quarter"] == Q_number]["稅後淨利率(母公司)"].iloc[0]
-            elif month in Q3_month:
-                Q_number = 'Q3'
-                df.loc[index, 'Quarter'] = Q_number
-                df.loc[index, 'EPS_ratio'] = df_EPS[df_EPS["Quarter"] == Q_number]["稅後淨利率(母公司)"].iloc[0]
+            # print(df_Finance["年度"].dtype)
+            # print(df_Finance[df_Finance["年度"]== year_row])
+            if df_Finance["年度"].dtype == "int64":
+                ratio = df_Finance[df_Finance["年度"]== year_row]["稅後淨利(%)"].iloc[0]
             else:
-                Q_number = 'Q4'
-                df.loc[index, 'Quarter'] = Q_number
-                df.loc[index, 'EPS_ratio'] = df_EPS[df_EPS["Quarter"] == Q_number]["稅後淨利率(母公司)"].iloc[0]
+                ratio = df_Finance[df_Finance["年度"] == str(year_row)]["稅後淨利(%)"].iloc[0]
+            if ratio == "-":
+                ratio = 0.0
+            ratio = float(ratio) * 0.01
+
+
+            #ratio = float(ratio)
+            # print(type(ratio), ratio)
+            df.loc[index, 'EPS_ratio']= ratio
+        elif year_row == this_year-1:
+            #print (df_EPS[(df_EPS["Year"] == year_row) & (df_EPS["Quarter"] == "Q"+str(quarter_row))])
+            df.loc[index, 'EPS_ratio'] = \
+                df_EPS[(df_EPS["Year"] == year_row) & (df_EPS["Quarter"] == "Q"+str(quarter_row))]["稅後淨利率(母公司)"].iloc[0]
+        elif year_row >= this_year:
+            if quarter_row < this_quarter:
+                print(this_year, type(this_year), quarter_row, this_quarter)
+
+                eps = df_EPS[(df_EPS["Year"] == this_year) & (df_EPS["Quarter"] == "Q"+str(quarter_row))]
+                print("Stock",stock_id, eps,"length is", len(eps))
+                if len(eps) == 0:
+                    df.loc[index, 'EPS_ratio'] = \
+                        df_EPS[(df_EPS["Year"] == this_year - 1) & (df_EPS["Quarter"] == "Q" + str(quarter_row))]["稅後淨利率(母公司)"].iloc[0]
+                else:
+                    df.loc[index, 'EPS_ratio'] = df_EPS[(df_EPS["Year"] == this_year) & (df_EPS["Quarter"] == "Q"+str(quarter_row))]["稅後淨利率(母公司)"].iloc[0]
+            if quarter_row >= this_quarter:
+                df.loc[index, 'EPS_ratio'] =\
+                    df_EPS[(df_EPS["Year"] == this_year-1) & (df_EPS["Quarter"] == "Q"+str(quarter_row))]["稅後淨利率(母公司)"].iloc[0]
+        else:
+            if quarter_row < this_quarter:
+                df.loc[index, 'EPS_ratio'] = \
+                    df_EPS[(df_EPS["Year"] == this_year) & (df_EPS["Quarter"] == "Q" + str(quarter_row))][
+                        "稅後淨利率(母公司)"].iloc[0]
+            if quarter_row >= this_quarter:
+                df.loc[index, 'EPS_ratio'] = \
+                    df_EPS[(df_EPS["Year"] == this_year - 1) & (df_EPS["Quarter"] == "Q" + str(quarter_row))][
+                        "稅後淨利率(母公司)"].iloc[0]
+        print(df.loc[index, 'EPS_ratio'])
 
 
     ##Todo get the captital for each stock from balance sheet
@@ -237,6 +246,7 @@ def get_forecast2(stock_id, year=10):
     df["capital"] = df_BS.loc[0,"普通股股本"]
     #df["capital"] = 2593
     #print("普通股股本", df["capital"])
+    print(df.dtypes)
     df["EPS_forecast"]=df["merged"]*df["EPS_ratio"]/df["capital"] * 10
 
 
