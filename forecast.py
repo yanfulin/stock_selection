@@ -74,6 +74,7 @@ def main():
         print("forecast==>", forecast_10y)
         forecast_10y.to_csv(f'{stock_id}/forecast/forecast_actual_merged.csv')
         Stock_Price_PER.export_to_excel2()
+        #comment
         #forecast_comparison.plot_forecast(forecast_10y, stock_id)
 
 
