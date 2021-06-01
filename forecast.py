@@ -17,50 +17,40 @@ import goodinfo_revenue_monthly
 import goodinfo_balance_sheet
 import goodinfo2
 import Stock_Price_PER
+from openpyxl import load_workbook
 
-## Set Date Formats
-# today_string = datetime.datetime.today().strftime('%m%d%Y_%I%p')
-# today_string2 = datetime.datetime.today().strftime('%b %d, %Y')
 
-# Goodinfo provides 5years/10years/ALL monthly revenue
-
-# def fbforecast(stock_id)
-# filelist = ["5Y", "10Y", "ALL"]
-#
-# # Set Folder Targets for Revenue Info
-# # Based on 5/10/All year revenue to do the coming 5 year forecast
-# for file in filelist:
-#     stock_id = "5534"
-#     file_html =str(file)+".html"
-#     stock_revenue_file = Path.cwd() / stock_id / file_html
-#     df=pd.read_html(stock_revenue_file)[0]
-#     col=["月別", "單月營收(億)"]
-#     df=df[col]
-#     df.columns=["ds", "y"]
-#     df.ds=pd.to_datetime(df.ds)
-#     #print(df.head())
-#     m1=Prophet()
-#     m1.fit(df)
-#     future1 = m1.make_future_dataframe(periods=60, freq='MS')
-#     forecast1 = m1.predict(future1)
-#     #print(forecast1.dtypes)
-#     #print (forecast1[['ds', 'yhat', 'yhat_lower', 'yhat_upper']])
-#     if not os.path.exists(stock_id):
-#         os.makedirs(stock_id)
-#     if not os.path.exists(f'{stock_id}/forecast/'):
-#         os.makedirs(f'{stock_id}/forecast/')
-#     forecast1.to_csv(f'{stock_id}/forecast/{file}.csv')
-
-# forecast_5y=forecast_comparison.forecast(stock_id, 5)
-# forecast_5y.to_csv(f'{stock_id}/forecast/forecast_actual_merged.csv')
-# forecast_comparison.plot_forecast(forecast_5y)
+def Get_StockCodeList():
+    Excel_file = Path.cwd() / "stocks.xlsx"
+    wb = load_workbook(Excel_file)
+    sheet = wb['evaluation']
+    #print (sheet.values)
+    colnames = ["Stock ID","Chinese Name","Name","Current Price","52W High","52W Low","Beta","Market Cap","PBR","PER",
+                "Target Price","Rick's PER","Comment","短中長投資屬性",
+                "Dividend","Yield %","Previous Year EPS","This Year EPS","Next Year EPS", "Max PER","Min PER","Avg PER",
+                "Price @ High PER","Price @ Avg PER","Price @ Min PER",
+                "2010 Q1 EPS", "2010 Q2 EPS", "2010 Q3 EPS", "2010 Q4 EPS",
+                "2011 Q1 EPS","2011 Q2 EPS","2011 Q3 EPS","2011 Q4 EPS",
+                "2012 Q1 EPS","2012 Q2 EPS","2012 Q3 EPS","2012 Q4 EPS",
+                "2010 Total EPS","2011 Total EPS","2012 Total EPS",
+                "過去五年平均配息％","股利", "Yield %", "PER High","PER Low","Price @High PE", "Price @Low PE",
+                "Price@Low PE- Market Price", "Price @6% Yield"]
+    col_indices = {n: cell.value for n, cell in enumerate(sheet['1']) if cell.value in colnames}
+    print (col_indices)
+    stock_list=[]
+    for row in sheet["A"]:
+            if row.value != None:
+                #print ("row===>", row.value)
+                stock_list.append(str(row.value))
+    print(stock_list[1:])
+    return stock_list[1:]
 
 def main():
 
-
-    fin = open('StockCode', 'r+')
-    StockCodeList = [str(i) for i in fin.read().splitlines()]
-    fin.close()
+    StockCodeList = Get_StockCodeList()
+    # fin = open('StockCode', 'r+')
+    # StockCodeList = [str(i) for i in fin.read().splitlines()]
+    # fin.close()
 
     for stock_id in StockCodeList:
         print ("ID=", stock_id)
@@ -73,7 +63,8 @@ def main():
         forecast_10y=forecast_comparison.get_forecast2(stock_id, 10)
         print("forecast==>", forecast_10y)
         forecast_10y.to_csv(f'{stock_id}/forecast/forecast_actual_merged.csv')
-        Stock_Price_PER.export_to_excel2()
+
+    Stock_Price_PER.export_to_excel2()
         #comment
         #forecast_comparison.plot_forecast(forecast_10y, stock_id)
 
