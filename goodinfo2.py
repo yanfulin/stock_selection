@@ -14,6 +14,7 @@ from openpyxl import load_workbook
 requests.packages.urllib3.disable_warnings()
 def GetHtmlcode(ID):
     # Get the webpage's source html code
+    #ID = str(ID)
     source = 'https://goodinfo.tw/StockInfo/StockBzPerformance.asp?STOCK_ID='
     url = source + ID
     #print (url)

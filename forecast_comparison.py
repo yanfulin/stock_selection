@@ -145,8 +145,8 @@ def get_forecast2(stock_id, year=10):
     df = df[col]
     df.columns = ["ds", "y"]
     df['forecast']='Actual'
-    print("forecast is actual????")
-    print(df.head())
+    #print("forecast is actual????")
+    #print(df.head())
     df.ds = pd.to_datetime(df.ds)
 
     df_5Y = pd.read_csv(f"{stock_id}/forecast/5Y.csv")
@@ -250,8 +250,8 @@ def get_forecast2(stock_id, year=10):
     df["EPS_forecast"]=df["merged"]*df["EPS_ratio"]/df["capital"] * 10
 
 
-    print(df.head())
-    print(df[(df.ds > "2020-12") & (df.ds < "2022-1")])
+    #print(df.head())
+    #print(df[(df.ds > "2020-12") & (df.ds < "2022-1")])
     return df[["ds","merged","forecast","Quarter","Year","capital", "EPS_ratio", "EPS_forecast"]]
 
 
