@@ -52,8 +52,8 @@ def get_forecast(stock_id, year=10):
     df = df[col]
     df.columns = ["ds", "y"]
     df['forecast'] = 'Actual'
-    print("forecast is actual????")
-    print(df.head())
+    #print("forecast is actual????")
+    #print(df.head())
     df.ds = pd.to_datetime(df.ds)
 
     df_5Y = pd.read_csv(f"{stock_id}/forecast/5Y.csv")
@@ -125,8 +125,8 @@ def get_forecast(stock_id, year=10):
     # print("普通股股本", df["capital"])
     df["EPS_forecast"] = df["merged"] * df["EPS_ratio"] / df["capital"] * 10
 
-    print(df.head())
-    print(df[(df.ds > "2020-12") & (df.ds < "2022-1")])
+    #print(df.head())
+    #print(df[(df.ds > "2020-12") & (df.ds < "2022-1")])
     return df[["ds", "merged", "forecast", "Quarter", "Year", "capital", "EPS_ratio", "EPS_forecast"]]
 
 
@@ -192,7 +192,7 @@ def get_forecast2(stock_id, year=10):
 
         df.loc[index, "Year"]= year_row
         df.loc[index, "Quarter"] = quarter_row
-        print ("Row['ds']", row['ds'],  "Year is", year_row, "Month is", month_row, "Quarter is ", quarter_row)
+        # print ("Row['ds']", row['ds'],  "Year is", year_row, "Month is", month_row, "Quarter is ", quarter_row)
 
         if year_row < this_year-1:
 
@@ -216,10 +216,10 @@ def get_forecast2(stock_id, year=10):
                 df_EPS[(df_EPS["Year"] == year_row) & (df_EPS["Quarter"] == "Q"+str(quarter_row))]["稅後淨利率(母公司)"].iloc[0]
         elif year_row >= this_year:
             if quarter_row < this_quarter:
-                print(this_year, type(this_year), quarter_row, this_quarter)
+                # print(this_year, type(this_year), quarter_row, this_quarter)
 
                 eps = df_EPS[(df_EPS["Year"] == this_year) & (df_EPS["Quarter"] == "Q"+str(quarter_row))]
-                print("Stock",stock_id, eps,"length is", len(eps))
+                # print("Stock",stock_id, eps,"length is", len(eps))
                 if len(eps) == 0:
                     df.loc[index, 'EPS_ratio'] = \
                         df_EPS[(df_EPS["Year"] == this_year - 1) & (df_EPS["Quarter"] == "Q" + str(quarter_row))]["稅後淨利率(母公司)"].iloc[0]
@@ -246,7 +246,7 @@ def get_forecast2(stock_id, year=10):
     df["capital"] = df_BS.loc[0,"普通股股本"]
     #df["capital"] = 2593
     #print("普通股股本", df["capital"])
-    print(df.dtypes)
+    #print(df.dtypes)
     df["EPS_forecast"]=df["merged"]*df["EPS_ratio"]/df["capital"] * 10
 
 
@@ -341,7 +341,7 @@ def Get_Balance_sheet_code(ID):
         df.columns.name = ""
         df=df.reset_index(drop=True)
 
-        print (df)
+        #print (df)
 
         key = key.replace('/', '_')
 
@@ -422,7 +422,7 @@ def Get_Income_statement_code(ID):
         df.columns.name = ""
         df = df.reset_index(drop=True)
 
-        print(df)
+        #print(df)
 
         key = key.replace('/', '_')
 

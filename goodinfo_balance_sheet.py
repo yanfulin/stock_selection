@@ -86,7 +86,7 @@ def Get_Balance_sheet_code(ID):
         df.columns.name = ""
         df=df.reset_index(drop=True)
 
-        print (df)
+        #print (df)
 
         key = key.replace('/', '_')
 
@@ -167,7 +167,7 @@ def Get_Income_statement_code(ID):
         df.columns.name = ""
         df = df.reset_index(drop=True)
 
-        print(df)
+        #print(df)
 
         key = key.replace('/', '_')
 
@@ -194,7 +194,7 @@ def main():
         print ("ID=", ID)
         page = Get_Balance_sheet_code(ID)
         page2 = Get_Income_statement_code(ID)
-        time.sleep(10)
+        time.sleep(1)
 
 if __name__ == "__main__":
     main()

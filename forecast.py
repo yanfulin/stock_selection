@@ -29,10 +29,10 @@ def Get_StockCodeList():
                 "Target Price","Rick's PER","Comment","短中長投資屬性",
                 "Dividend","Yield %","Previous Year EPS","This Year EPS","Next Year EPS", "Max PER","Min PER","Avg PER",
                 "Price @ High PER","Price @ Avg PER","Price @ Min PER",
-                "2010 Q1 EPS", "2010 Q2 EPS", "2010 Q3 EPS", "2010 Q4 EPS",
-                "2011 Q1 EPS","2011 Q2 EPS","2011 Q3 EPS","2011 Q4 EPS",
-                "2012 Q1 EPS","2012 Q2 EPS","2012 Q3 EPS","2012 Q4 EPS",
-                "2010 Total EPS","2011 Total EPS","2012 Total EPS",
+                "2020 Q1 EPS", "2020 Q2 EPS", "2020 Q3 EPS", "2020 Q4 EPS",
+                "2021 Q1 EPS","2021 Q2 EPS","2021 Q3 EPS","2021 Q4 EPS",
+                "2022 Q1 EPS","2022 Q2 EPS","2022 Q3 EPS","2022 Q4 EPS",
+                "2020 Total EPS","2021 Total EPS","2022 Total EPS",
                 "過去五年平均配息％","股利", "Yield %", "PER High","PER Low","Price @High PE", "Price @Low PE",
                 "Price@Low PE- Market Price", "Price @6% Yield"]
     col_indices = {n: cell.value for n, cell in enumerate(sheet['1']) if cell.value in colnames}
@@ -61,7 +61,7 @@ def main():
         EPS_forecast.GetEPScode(stock_id)
         forecast_comparison.make_forecast(stock_id)
         forecast_10y=forecast_comparison.get_forecast2(stock_id, 10)
-        print("forecast==>", forecast_10y)
+        # print("forecast==>", forecast_10y)
         forecast_10y.to_csv(f'{stock_id}/forecast/forecast_actual_merged.csv')
 
     Stock_Price_PER.export_to_excel2()

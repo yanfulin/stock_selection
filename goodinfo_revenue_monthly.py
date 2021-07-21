@@ -72,7 +72,10 @@ def GetHtmlcode(ID):
         df = pd.read_html(str(soup))[1]
         df.columns = columns[key]
         df.columns.name = ""
-        print (df)
+        df2 =df[df['月別']=='月別'].index
+        df =df.drop(df2)
+        #print (df2)
+        #print (df)
 
         key = key.replace('/', '_')
 
@@ -101,7 +104,7 @@ def main():
     for ID in StockCodeList:
         print ("ID=", ID)
         page = GetHtmlcode(ID)
-        time.sleep(10)
+        time.sleep(1)
 
 
 if __name__ == "__main__":

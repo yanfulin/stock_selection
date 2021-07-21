@@ -225,6 +225,9 @@ def GetHtmlcode(ID):
             df_final[u'最高PBR'] = df[u'最高PBR']
             df_final[u'最低PBR'] = df[u'最低PBR']
             df_final[u'平均PBR'] = df[u'平均PBR']
+            # add code to remove the extra "年度" row
+            df2 = df[df['年度'] == '年度'].index
+            df = df.drop(df2)
 
 
             # print df_final[u'平均本益比']
@@ -267,7 +270,7 @@ def GetHtmlcode(ID):
 
 
 
-    Excel_file = Path.cwd() / "stocks2.xlsx"
+    Excel_file = Path.cwd() / "stocks.xlsx"
     book = load_workbook(Excel_file)
     with pd.ExcelWriter(Excel_file, engine='openpyxl') as writer:
         writer.book = book
@@ -291,7 +294,7 @@ def main():
     for ID in StockCodeList:
         print ("ID=", ID)
         page = GetHtmlcode(ID)
-        time.sleep(10)
+        time.sleep(1)
 
 
 if __name__ == "__main__":
