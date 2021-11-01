@@ -97,33 +97,59 @@ def GetEPScode(ID):
         #[s.extract() for s in soup('thead')] # remove thead
         #[s.find_parent('tr').extract() for s in soup.find_all('td', style=re.compile(r"color:blue;width:25%"))]
         #找到td style = color:blue ,然後往上一層找tr, extract結果
-        [s.find_parent('tr').extract() for s in soup.find_all('td', style=lambda value: value and 'color:blue' in value)[1:]]
+        column_list = []
+        for s in soup.find('tr', class_="bg_h1 fw_normal"):
+            column_list.append(s.nobr.string)
+            #column_list.append(s.nobr.string)
+        print(column_list)
+        [s.decompose() for s in soup.find_all('tr', class_="bg_h1 fw_normal")]
+
+
+
+        #[s.find_parent('tr').extract() for s in soup.find_all('td', style=lambda value: value and 'color:blue' in value)[1:]]
 
         df = pd.read_html(str(soup))[1]
+        #print(df)
 
-        # duplicate the first row as the columns name
+        # # duplicate the first row as the columns name
+        # df.columns = df.iloc[0]
+        # #df.index.name = "Financial_Ratio"
+        # df.columns.name =""
+        # df=df.drop([0]).T
+        # print(df)
+        # df.columns = df.iloc[0]
+        # df.columns.name =""
+        # #df = df.drop(["獲利能力"])
+
+        df = df.T
         df.columns = df.iloc[0]
-        #df.index.name = "Financial_Ratio"
-        df.columns.name =""
-        df=df.drop([0]).T
-
-        df.columns = df.iloc[0]
-        df.columns.name =""
-        df = df.drop(["獲利能力"])
-
-        #print (df)
+        df["Time"] = column_list[:]
+        df.drop(0, inplace=True, axis=0)
+        df = df.set_index('Time').reset_index()
+        print (df)
 
         #print(df[["獲利能力"]].head(20))
         #EPS = df[df["獲利能力"]=="每股稅後盈餘(元)"].T
-        EPS=df[["稅後淨利率(母公司)","每股稅後盈餘(元)"]]
-        EPS["每股稅後盈餘(元)"]=EPS["每股稅後盈餘(元)"].astype(float)
-        EPS["稅後淨利率(母公司)"] = EPS["稅後淨利率(母公司)"].astype(float)*0.01
-        EPS["date"] = pd.to_datetime(EPS.index)
+        EPS=df[["Time","稅後淨利率(母公司)","每股稅後盈餘(元)"]]
+        #EPS = EPS.set_index('Time')
+
+        print(EPS["每股稅後盈餘(元)"])
+        #EPS["每股稅後盈餘(元)"]=EPS["每股稅後盈餘(元)"].astype(float)
+        #EPS["稅後淨利率(母公司)"] = EPS["稅後淨利率(母公司)"].astype(float)*0.01
+
+        EPS["每股稅後盈餘(元)"] = pd.to_numeric(EPS["每股稅後盈餘(元)"], errors='coerce')
+        EPS["稅後淨利率(母公司)"] = pd.to_numeric(EPS["稅後淨利率(母公司)"], errors='coerce')
+        EPS["稅後淨利率(母公司)"] = EPS["稅後淨利率(母公司)"]* 0.01
+        #print("EPS.index", EPS.columns)
+        #print(EPS)
+        #EPS["date"] = pd.to_datetime(EPS.index)
+        EPS['date'] = pd.to_datetime([f'{x[:4]}{x[4:]}' for x in EPS['Time']])
+        #EPS["date"] = EPS["Time"]
         #EPS["date"]=EPS["date"].dt.to_period("Q").dt.end_time.dt.date
         EPS["quarter_end"] = EPS["date"].dt.to_period("Q").dt.end_time
         EPS["quarter_end"] = EPS["quarter_end"].dt.strftime("%Y-%m-%d")
         EPS=EPS.set_index("quarter_end")
-        print(EPS)
+        #print(EPS)
 
         # add column "Quarter" and "Year" and "EPS estimation"
         Q1_month = [1, 2, 3]

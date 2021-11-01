@@ -70,21 +70,77 @@ def Get_Balance_sheet_code(ID):
         res.encoding = 'utf-8'
         soup = BeautifulSoup(res.text.replace('&nbsp;', '').replace('　', ''), 'html.parser')
 
-        [s.find_parent('tr').extract() for s in
-        soup.find_all('td', style=lambda value: value and 'color:blue' in value)[1:]]
-        [s.find_parent('tr').extract() for s in
-         soup.find_all('td', string="金額")]
+        # find the rows with <tr class = "bg_h1 fw_normal" and remove two <tr>
+        # extract the header and convert to list (ex. 2021Q2, 2021Q1
+        #< tr class ="bg_h1 fw_normal" style="text-align:center;" >
+        # < td rowspan="2" style="color:blue;" > < nobr > 負債 < / nobr > < / td >
+        # < td colspan="2" > < nobr > 2021Q2 < / nobr > < / td >
+        # < td colspan="2" > < nobr > 2021Q1 < / nobr > < / td >
+        # < td colspan="2" > < nobr > 2020Q4 < / nobr > < / td >
+        # < td colspan="2" > < nobr > 2020Q3 < / nobr > < / td >
+        # < td colspan="2" > < nobr > 2020Q2 < / nobr > < / td >
+        # < td colspan="2" > < nobr > 2020Q1 < / nobr > < / td >
+        # < td colspan="2" > < nobr > 2019Q4 < / nobr > < / td >
+        # < / tr >
+        #< tr class ="bg_h1" style="font-weight:bold;text-align:center;" >
+        # < td > < nobr > & nbsp;金額 & nbsp; < / nobr > < / td >
+        # < td > & nbsp;％ & nbsp; < / td >
+        # < td > < nobr > & nbsp;金額 & nbsp; < / nobr > < / td >
+        # < td > & nbsp;％ & nbsp; < / td >
+        # < td > < nobr > & nbsp;金額 & nbsp; < / nobr >
+        # < / td > < td > & nbsp;％ & nbsp; < / td >
+        # < td > < nobr > & nbsp;金額 & nbsp; < / nobr > < / td >
+        # < td > & nbsp;％ & nbsp; < / td >
+        # < td > < nobr > & nbsp;金額 & nbsp; < / nobr > < / td >
+        # < td > & nbsp;％ & nbsp; < / td >
+        # < td > < nobr > & nbsp;金額 & nbsp; < / nobr > < / td >
+        # < td > & nbsp;％ & nbsp; < / td >
+        # < td > < nobr > & nbsp;金額 & nbsp; < / nobr > < / td >
+        # < td > & nbsp;％ & nbsp; < / td > < / tr >
 
+        # [s.find_parent('tr').extract() for s in
+        # soup.find_all('td', style=lambda value: value and 'color:blue' in value)[1:]]
+        # [s.find_parent('tr').extract() for s in
+        #  soup.find_all('td', string="金額")]
+
+        # [soup.find_all('tr', class_="bg_h1 fw_normal").extract()]
+        # [soup.find_all('tr', class_="bg_h1").extract()]
+        column_list = []
+        for s in soup.find('tr', class_="bg_h1 fw_normal"):
+            column_list.append(s.nobr.string)
+            column_list.append(s.nobr.string)
+        [s.decompose() for s in soup.find_all('tr', class_="bg_h1 fw_normal")]
+        [s.decompose() for s in soup.find_all('tr', class_="bg_h1")]
 
         df = pd.read_html(str(soup))[1]
-
-        df.iloc[1]=df.iloc[1].shift(-1)
-        df.drop(columns=[15], inplace=True, axis=1)
-        df=df.T
+        df = df.T
         df.columns = df.iloc[0]
+        df["Time"] = column_list[1:]
         df.drop(0, inplace=True, axis=0)
-        df.columns.name = ""
-        df=df.reset_index(drop=True)
+        df = df.set_index('Time').reset_index()
+
+
+        # df = pd.read_html(str(soup))[1]
+        # # original
+        # #df.iloc[1]=df.iloc[1].shift(-1)
+        # #df.drop(columns=[15], inplace=True, axis=1)
+        # df = df.T
+        # df.columns = df.iloc[0]
+        # #df.columns = column_list
+        # df["Time"]= column_list[1:]
+        # df.drop(0, inplace=True, axis=0)
+        # #df.columns.name = ""
+        # #df = df.reset_index(drop=True)
+        # df = df.set_index('Time').reset_index()
+        # #df.set_index("quarter")
+
+        # new code
+        # df = df.drop(df.iloc[:, [15]], axis=1)
+        # df=df.T
+        # df.columns = df.iloc[0]
+        # df=df.drop(0, axis=0)
+        # df.columns.name = ""
+        # df=df.reset_index(drop=True)
 
         #print (df)
 
@@ -152,22 +208,37 @@ def Get_Income_statement_code(ID):
         res.encoding = 'utf-8'
         soup = BeautifulSoup(res.text.replace('&nbsp;', '').replace('　', ''), 'html.parser')
 
-        [s.find_parent('tr').extract() for s in
-         soup.find_all('td', style=lambda value: value and 'color:blue' in value)[1:]]
-        [s.find_parent('tr').extract() for s in
-         soup.find_all('td', string="金額")]
-
-        df = pd.read_html(str(soup))[1]
-
-        df.iloc[1] = df.iloc[1].shift(-1)
-        df.drop(columns=[15], inplace=True, axis=1)
-        df = df.T
-        df.columns = df.iloc[0]
-        df.drop(0, inplace=True, axis=0)
-        df.columns.name = ""
-        df = df.reset_index(drop=True)
+        # [s.find_parent('tr').extract() for s in
+        #  soup.find_all('td', style=lambda value: value and 'color:blue' in value)[1:]]
+        # [s.find_parent('tr').extract() for s in
+        #  soup.find_all('td', string="金額")]
+        #
+        # df = pd.read_html(str(soup))[1]
+        #
+        # df.iloc[1] = df.iloc[1].shift(-1)
+        # df.drop(columns=[15], inplace=True, axis=1)
+        # df = df.T
+        # df.columns = df.iloc[0]
+        # df.drop(0, inplace=True, axis=0)
+        # df.columns.name = ""
+        # df = df.reset_index(drop=True)
 
         #print(df)
+        column_list = []
+        for s in soup.find('tr', class_="bg_h1 fw_normal"):
+            column_list.append(s.nobr.string)
+            column_list.append(s.nobr.string)
+        [s.decompose() for s in soup.find_all('tr', class_="bg_h1 fw_normal")]
+        [s.decompose() for s in soup.find_all('tr', class_="bg_h1")]
+
+        df = pd.read_html(str(soup))[1]
+        df = df.T
+        df.columns = df.iloc[0]
+        df["Time"] = column_list[1:]
+        df.drop(0, inplace=True, axis=0)
+        df = df.set_index('Time').reset_index()
+
+
 
         key = key.replace('/', '_')
 
@@ -186,7 +257,7 @@ def Get_Income_statement_code(ID):
 
 def main():
 
-    fin = open('StockCode', 'r+')
+    fin = open('StockCode2330', 'r+')
     StockCodeList = [str(i) for i in fin.read().splitlines()]
     fin.close()
 
